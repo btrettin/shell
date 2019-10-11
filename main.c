@@ -22,8 +22,9 @@ int main(void) {
         char *to;
         char buf[1000];
         char *args[MAXARGS + 1] = { NULL };
-
+        gdir = getcwd(buf, sizeof(buf));
         // Read Input
+        printf("%s",gdir);
         printf("%s ", "$");
         fgets(input, PRMTSIZ, stdin);
 
@@ -36,12 +37,23 @@ int main(void) {
             *ptr = '\0';
         }
 
-        // Quit Bash
-        if (!strcmp(args[0], "quit")) exit(0);
+        // Check for Multiple Commands
+        if (!strcmp(args[0], "date;cal;")){
+            printf("%s\n","yeeeet");
+            char* temp = args[0];
+            for (int i = 0; i < strlen(temp); i++){
+                if(temp[i] == ';'){
+                  printf("%c\n",temp[i]);
+                }
+            }
+        }
 
-        // cd command - switch directory
+        // Quit Bash
+        if (!strcmp(args[0], "quit")){
+        exit(0);
+        }
+        // Switch Directory
         if (!strcmp(args[0], "cd")){
-          gdir = getcwd(buf, sizeof(buf));
           dir = strcat(gdir, "/");
           if(args[1] == 0){
             printf("%s\n",gdir);
@@ -52,9 +64,19 @@ int main(void) {
           }
         }
 
-        // clear shell
+        // Clear shell
         if (!strcmp(args[0], "clr")){
             clear();
+        }
+
+        // Print environement strings
+        if (!strcmp(args[0], "environ")){
+            args[0] = "printenv";
+        }
+
+        // Print more menu
+        if (!strcmp(args[0], "help")){
+            args[0] = "more";
         }
 
         //Execute
