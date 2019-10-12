@@ -5,8 +5,6 @@
 #include<unistd.h>
 #include<sys/types.h>
 #include<sys/wait.h>
-#include<readline/readline.h>
-#include<readline/history.h>
 
 #define MAXCOM 1000 // max number of letters to be supported
 #define MAXLIST 100 // max number of commands to be supported
@@ -14,31 +12,14 @@
 // Clearing the shell using escape sequences
 #define clear() printf("\033[H\033[J")
 
-// Greeting shell during startup
-void init_shell()
-{
-    clear();
-    printf("\n\n\n\n******************"
-        "************************");
-    printf("\n\n\n\t****MY SHELL****");
-    printf("\n\n\t-USE AT YOUR OWN RISK-");
-    printf("\n\n\n\n*******************"
-        "***********************");
-    char* username = getenv("USER");
-    printf("\n\n\nUSER is: @%s", username);
-    printf("\n");
-    sleep(1);
-    clear();
-}
 
 // Function to take input
 int takeInput(char* str)
 {
     char* buf;
 
-    buf = readline("\n>>> ");
+    buf = fgets(str, MAXCOM, stdin);
     if (strlen(buf) != 0) {
-        add_history(buf);
         strcpy(str, buf);
         return 0;
     } else {
@@ -65,7 +46,7 @@ void execArgs(char** parsed)
         return;
     } else if (pid == 0) {
         if (execvp(parsed[0], parsed) < 0) {
-            printf("\nCould not execute command..");
+            printf("\nCould not execute command............");
         }
         exit(0);
     } else {
@@ -150,44 +131,65 @@ void openHelp()
 // Function to execute builtin commands
 int ownCmdHandler(char** parsed)
 {
-    int NoOfOwnCmds = 4, i, switchOwnArg = 0;
-    char* ListOfOwnCmds[NoOfOwnCmds];
-    char* username;
+  char *dir;
+  char *gdir;
+  char *to;
+  // quit
+  char cmd1[5] = "quit";
+  if (strcmp(parsed[0],cmd1) == 0){
+    printf("%s\n","success!!");
+    return 1;
+  }
 
-    ListOfOwnCmds[0] = "exit";
-    ListOfOwnCmds[1] = "cd";
-    ListOfOwnCmds[2] = "help";
-    ListOfOwnCmds[3] = "hello";
+  // check multiple commands
+  char cmd2[10] = "date;cal;";
+  if (!strcmp(parsed[0], cmd2)){
+      printf("%s\n","yeeeet");
+      char* temp = parsed[0];
+      for (int i = 0; i < strlen(temp); i++){
+          if(temp[i] == ';'){
+            printf("%c\n",temp[i]);
+          }
+      }
+      return 1;
+  }
 
-    for (i = 0; i < NoOfOwnCmds; i++) {
-        if (strcmp(parsed[0], ListOfOwnCmds[i]) == 0) {
-            switchOwnArg = i + 1;
-            break;
-        }
+  // Switch Directory
+  char cmd3[3] = "cd";
+  if (!strcmp(parsed[0], cmd3)){
+    dir = strcat(gdir, "/");
+    if(parsed[1] == 0){
+      printf("%s\n",gdir);
     }
-
-    switch (switchOwnArg) {
-    case 1:
-        printf("\nGoodbye\n");
-        exit(0);
-    case 2:
-        chdir(parsed[1]);
-        return 1;
-    case 3:
-        openHelp();
-        return 1;
-    case 4:
-        username = getenv("USER");
-        printf("\nHello %s.\nMind that this is "
-            "not a place to play around."
-            "\nUse help to know more..\n",
-            username);
-        return 1;
-    default:
-        break;
+    else{
+    to = strcat(dir, parsed[1]);
+    if(chdir(to) == -1) printf("%s","error: no such directory found\n");
     }
+    return 1;
+  }
 
-    return 0;
+  // Clear shell
+  char cmd4[4] = "clr";
+  if (!strcmp(parsed[0], cmd4)){
+      clear();
+      return 1;
+  }
+
+  // Print environement strings
+  char cmd5[7] = "environ";
+  if (!strcmp(parsed[0], cmd5)){
+      parsed[0] = "printenv";
+      return 1;
+  }
+
+  // Print more menu
+  char cmd6[4] = "help";
+  if (!strcmp(parsed[0], cmd6)){
+      parsed[0] = "more";
+      return 1;
+  }
+
+  return 0;
 }
 
 // function for finding pipe
@@ -235,7 +237,6 @@ int processString(char* str, char** parsed, char** parsedpipe)
         parseSpace(strpiped[1], parsedpipe);
 
     } else {
-
         parseSpace(str, parsed);
     }
 
@@ -250,17 +251,17 @@ int main()
     char inputString[MAXCOM], *parsedArgs[MAXLIST];
     char* parsedArgsPiped[MAXLIST];
     int execFlag = 0;
-    init_shell();
 
     while (1) {
         // print shell line
-        printDir();
+        printf("%s","\n");
+        printf("%s","Ben$");
         // take input
-        if (takeInput(inputString))
-            continue;
+        //if (takeInput(inputString))
+        //    continue;
+        fgets(inputString, MAXLIST, stdin);
         // process
-        execFlag = processString(inputString,
-        parsedArgs, parsedArgsPiped);
+        execFlag = processString(inputString, parsedArgs, parsedArgsPiped);
         // execflag returns zero if there is no command
         // or it is a builtin command,
         // 1 if it is a simple command
