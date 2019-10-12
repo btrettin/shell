@@ -4,7 +4,7 @@
 
 Download the Zip file. Unzip the code
 
-To compile the code, cd into the shell directory and run the command below
+To compile the code, cd into the myshell directory and run the command below
 
 
 make
